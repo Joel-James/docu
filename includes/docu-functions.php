@@ -76,58 +76,62 @@ function docu_get_prevnext_links( $id, $taxonomy = 'doc_category' ) {
   global $post;
   $terms = get_the_terms( $id, $taxonomy );
 
-  foreach ($terms as $term) {
-    $term_id = $term->term_id;
-    $term_slug = $term->slug;
+  if( $terms ) {
+
+      foreach ($terms as $term) {
+        $term_id = $term->term_id;
+        $term_slug = $term->slug;
+      }
+
+      $args = array(
+        'post_type' => 'doc',
+        'post_status' => 'publish',
+        'tax_query' => array(
+          array(
+            'taxonomy' => 'doc_category',
+            'field' => 'id',
+            'terms' => array( $term_id )
+          ),
+        ),
+        'orderby' => 'menu_order', 
+        'order' => 'ASC'
+      );
+                
+      $the_query = new WP_Query( $args );
+      $ids = array();
+                
+      if ( $the_query->have_posts() ) {
+                
+        while ( $the_query->have_posts() ) {
+          $the_query->the_post();
+          $ids[] = $post->ID;     
+        }
+                
+      } 
+
+      wp_reset_postdata();
+
+      $index = array_search( $post->ID, $ids );
+      $link_ids = array();
+
+      $previd = 0;
+      $nextid = 0;
+
+      if ( $index > 0 ) {
+        $prev = $index - 1;
+        $previd = $ids[ $prev ];
+      }
+
+      if ( $index < count( $ids ) - 1 ) {
+        $next = $index + 1;
+        $nextid = $ids[ $next ];
+      }
+
+      array_push($link_ids, $previd, $nextid );
+
+      return $link_ids;
+
   }
-
-  $args = array(
-    'post_type' => 'doc',
-    'post_status' => 'publish',
-    'tax_query' => array(
-      array(
-        'taxonomy' => 'doc_category',
-        'field' => 'id',
-        'terms' => array( $term_id )
-      ),
-    ),
-    'orderby' => 'menu_order', 
-    'order' => 'ASC'
-  );
-            
-  $the_query = new WP_Query( $args );
-  $ids = array();
-            
-  if ( $the_query->have_posts() ) {
-            
-    while ( $the_query->have_posts() ) {
-      $the_query->the_post();
-      $ids[] = $post->ID;     
-    }
-            
-  } 
-
-  wp_reset_postdata();
-
-  $index = array_search( $post->ID, $ids );
-  $link_ids = array();
-
-  $previd = 0;
-  $nextid = 0;
-
-  if ( $index > 0 ) {
-    $prev = $index - 1;
-    $previd = $ids[ $prev ];
-  }
-
-  if ( $index < count( $ids ) - 1 ) {
-    $next = $index + 1;
-    $nextid = $ids[ $next ];
-  }
-
-  array_push($link_ids, $previd, $nextid );
-
-  return $link_ids;
 
 } 
 
@@ -182,7 +186,17 @@ function docu_search_filter( $query ) {
 
   if( $query->is_search ) {
 
-    $search_post_type = get_query_var('docu_post_type');
+    // get docu_post_type value
+    if ( isset( $_POST['docu_post_type'] ) ) {
+
+      $search_post_type = $_POST['docu_post_type'];
+
+    } else {
+
+      return false;
+
+    }
+   
     $s = $query->get('s');
     
     if( empty( $s ) ) { return false; }

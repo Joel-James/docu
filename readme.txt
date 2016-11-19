@@ -2,8 +2,8 @@
 Contributors: dinamiko
 Tags: documentation, docs, doc, documents, document
 Requires at least: 3.9
-Tested up to: 4.2.2
-Stable tag: 1.3
+Tested up to: 4.2.4
+Stable tag: 1.5
 
 A simple Documentation Plugin
 
@@ -43,6 +43,10 @@ http://masonry.desandro.com
 https://github.com/desandro/imagesloaded
 
 == Changelog ==
+= 1.5 =
+* Removes errors when no term is found  
+= 1.4 =
+* Docu search form now search only for doc post type  
 = 1.3 =
 * Dashicons enqueued in load-js-css.php 
 = 1.2 =
